@@ -93,26 +93,40 @@ $checkbox.change(function(){
   $moneySpan.append(money);
   $(".activities span").remove();
   $(".activities").append($moneySpan);
-});
 
-$(".tuesday").change(function(){
+  //If there is atleast one element checked on tuesday morning
   if ($(".tuesday.am:checked").length > 0){
+    //Then disable each element
     $(".tuesday.am").each(function(){
-      $(this).prop("disabled", true)
+      $(this).prop("disabled", true);
+      $(this).parent().addClass("error");
     });
   } else {
+    //Else enable each element
     $(".tuesday.am").each(function(){
       $(this).prop("disabled", false);
+      $(this).parent().removeClass("error")
     });
   }
+  //If there is atleast one element on tuesday afternoon
   if ($(".tuesday.pm:checked").length > 0){
     $(".tuesday.pm").each(function(){
       $(this).prop("disabled", true)
+      $(this).parent().addClass("error");
     })
   } else {
     $(".tuesday.pm").each(function(){
       $(this).prop("disabled", false);
+      $(this).parent().removeClass("error")
     })
   }
+  //Keep the already checked items enabled
   $(".tuesday:checked").prop("disabled", false);
+  $(".tuesday:checked").parent().removeClass("error")
 });
+
+// ===== 5th task: ”Register for Activities” section of the form:
+
+//Hide all payment methods but the credit-card method, default
+//Based on the value of the payment method select
+  //Display only one at a time

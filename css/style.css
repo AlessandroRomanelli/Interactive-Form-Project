@@ -151,6 +151,11 @@ span {
   font-weight: bold;
 }
 
+.error {
+  color: #c1deeb;
+  text-decoration: line-through;
+}
+
 /* =================================
   Page Styles
 ==================================== */
