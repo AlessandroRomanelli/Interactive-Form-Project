@@ -7,22 +7,28 @@
  $(document).ready(function(){
    //Give focus to the first text field
    $("input[type=text]")[0].focus();
+   //Give the credit-card number a mask to reduce user input errors
+   jQuery(function($){
+   $("#cc-num").mask("9999-9999-9999-9999", {placeholder:"XXXX-XXXX-XXXX-XXXX"});
+});
  });
 
 // ===== 2nd task: ”Job Role” section of the form:
 
 //When Job Role option changes
 $("select#title").change(function(){
+  //jQuery rappresentation of the textField                              v-----  Text that will hide automatically with user input
+  var $textField = $('<textarea id="other-title" name="user_title" placeholder=" Please specify your job role... "></textarea>');
   //If the option "Other" is selected
   if ($("select#title").val() == "other") {
-    //jQuery rappresentation of the textField                              v-----  Text that will hide automatically with user input
-    var $textField = $('<br><textarea id="other-title" name="user_title" placeholder="Please specify your job role... "></textarea>');
     //Append the textarea to the end of the first fieldset
     $("fieldset").first().append($textField);
     //Slide in animation
-    $textField.hide().slideDown();
+    $textField.hide().slideDown("fast");
     //Give the new generated content the focus for the user to type in
     $textField.focus();
+  } else {
+    $("#other-title").slideUp("fast", function() {this.remove()});
   }
 });
 
@@ -68,3 +74,45 @@ $("select#design").change(function(){
 });
 
 // ===== 4th task: ”Register for Activities” section of the form:
+
+//When a checkbox changes status
+var $checkbox = $(".activities input");
+var checkedClass = "";
+
+$checkbox.change(function(){
+//(Re)Calculate total purchase:
+  var money = 0,
+      $moneySpan = $("<span>Total purchase: $</span>"),
+      $checkedCB = $(".activities input:checked");
+  //Go through all checked items
+  for (i = 0; i < $checkedCB.length; i++) {
+    //Sum all the values
+    money += parseInt($checkedCB[i].value);
+  }
+  //Print the new value at the end of the list
+  $moneySpan.append(money);
+  $(".activities span").remove();
+  $(".activities").append($moneySpan);
+});
+
+$(".tuesday").change(function(){
+  if ($(".tuesday.am:checked").length > 0){
+    $(".tuesday.am").each(function(){
+      $(this).prop("disabled", true)
+    });
+  } else {
+    $(".tuesday.am").each(function(){
+      $(this).prop("disabled", false);
+    });
+  }
+  if ($(".tuesday.pm:checked").length > 0){
+    $(".tuesday.pm").each(function(){
+      $(this).prop("disabled", true)
+    })
+  } else {
+    $(".tuesday.pm").each(function(){
+      $(this).prop("disabled", false);
+    })
+  }
+  $(".tuesday:checked").prop("disabled", false);
+});

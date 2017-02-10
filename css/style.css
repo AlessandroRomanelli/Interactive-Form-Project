@@ -37,6 +37,7 @@ a {
 ==================================== */
 
 form {
+  border-radius: 10px;
 	padding: .875em 1.875em 1.875em;
 	background: #85b5ca;
 }
@@ -81,16 +82,20 @@ select {
 	margin-bottom: 1.125em;
 }
 
-input {
+input,
+textarea {
 	font-size: 1em;
 	font-weight: 500;
 	padding: .8em;
 	background: #c1deeb;
 	border: 2px solid #c1deeb;
 	outline: none;
+  border-radius: 4px;
+
 }
 
-input:focus {
+input:focus,
+textarea:focus {
 	background: #fff;
 	border-color: #5e97b0;
 	transition: border-color .4s, background-color .4s;
@@ -107,6 +112,7 @@ button {
 	background: #22627e;
 	margin: 1.25em 0 .5em;
 	cursor: pointer;
+  border-radius: 5px;
 }
 
 button:hover {
@@ -114,14 +120,35 @@ button:hover {
 }
 
 textarea {
+  height: 3.25em;
   width: 100%;
   resize: none;
-  height: 4em;
   font-family: inherit;
+  margin: 5px 0;
+  border-radius: 4px;
 }
 
-#colors-js-puns > select {
-  width: 125px;
+select {
+    line-height: 1.5em;
+    font-family: inherit;
+    text-shadow: none;
+    text-indent: 3px;
+    display: inline-block;
+    text-align: center;
+    border-radius: 4px;
+}
+
+select > option {
+  background-color: #c1deeb;
+}
+
+.shirt select {
+  width: 90%;
+  margin-right: 1.5em;
+}
+
+span {
+  font-weight: bold;
 }
 
 /* =================================
