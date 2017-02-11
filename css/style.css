@@ -151,9 +151,20 @@ span {
   font-weight: bold;
 }
 
-.error {
+.conflict {
   color: #c1deeb;
   text-decoration: line-through;
+}
+
+.disabled {
+  background-color: #c1deeb;
+  color: gray;
+}
+
+.disabled:hover {
+  background-color: #c1deeb;
+  color: gray;
+  cursor: default;
 }
 
 /* =================================
@@ -177,6 +188,11 @@ span {
 .credit-card {
 	margin-top: 1.25em;
 }
+
+.credit-card select {
+  width: 110px;
+}
+
 
 /* =================================
   Helper Classes
