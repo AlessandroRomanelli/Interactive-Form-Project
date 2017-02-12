@@ -1,14 +1,15 @@
 //Problem: Form compiling is not user-friendly
 //Solution: Add interactivity
 
+
+
 // ===== 1st task: Set focus on the first text field
 
  //When the page loads,
  $(document).ready(function(){
    //Give focus to the first text field
    $("input[type=text]")[0].focus();
-   $("form").children().last().prop("disabled", true);
-  $("form").children().last().addClass("disabled");
+   disableSubmit();
  });
 
 // ===== 2nd task: ”Job Role” section of the form:
@@ -144,17 +145,18 @@ $("#payment").change(function(){
 })
 
 // ===== 5th task: Form validation:
+var $submitButton = $("form").children().last()
 
 //Function to enable submit button
 function enableSubmit() {
-  $("form").children().last().prop("disabled", false);
-  $("form").children().last().removeClass("disabled");
+  $submitButton.prop("disabled", false);
+  $submitButton.removeClass("disabled");
 }
 
 //Function to disable submit button
 function disableSubmit() {
-  $("form").children().last().prop("disabled", true);
-  $("form").children().last().addClass("disabled");
+  $submitButton.prop("disabled", true);
+  $submitButton.addClass("disabled");
 }
 
 //Function to check if string is empty
@@ -180,12 +182,10 @@ function activityIsValid(){
 
 //Function to check if credit card number is between 13 and 16
 function CCIsValid(){
-  var str = $("#cc-num").val().replace(/-/g, "");
-  console.log(str);
+  str = $("#cc-num").val();
   return str.length >= 13 && str.length <= 16
 }
 
-//TO MYSELF: MAKE IT SO THAT THESE TWO TAKE ONLY NUMBERS
 //Function to check if ZIP code is valid
 function zipIsValid(){
   return $("#zip").val().length == 5;
@@ -196,32 +196,55 @@ function cvvIsValid(){
   return $("#cvv").val().length == 3;
 }
 
-//After leaving a field
-$("fieldset").change(function(){
-  //If any of this conditions is true
+//After changing a field
+$(document).on("change", "input, select, textarea", function(){
+  //If all of this conditions are true
   if (
       !isBlank($("#name").val()) &&
       emailIsValid() &&
       roleIsSelected() &&
       activityIsValid()
     ) {
-  if ($("#title").val() == "other"){
-    if (!isBlank($("#other-title").val())){
-      //If credit card div is displayed
-      if ($("#payment").val() == null || $("#payment").val() == "credit card") {
-          //If the credit card data is correct
-          if (CCIsValid() && zipIsValid() && cvvIsValid()) {
-            //Enable the submit button
+    //And if the "other" option in the role select is chosen
+    if ($("#title").val() == "other"){
+      //And if the user has specified his role
+      if (!isBlank($("#other-title").val())){
+        //And the payment is not credit card
+        if ($("#payment").val() !== null && $("#payment").val() !== "credit card") {
+          enableSubmit();
+        //Otherwise if the credit card is selected
+        } else {
+          //And if the credit card data is valid
+          if (CCIsValid() && zipIsValid() && cvvIsValid())  {
             enableSubmit();
-          //Otherwise disable it
+          //Otherwise
           } else {
             disableSubmit();
           }
-        //Otherwise if users selects other payment methods, enable
-        } else {
-          enableSubmit();
         }
+        //Otherwise if the role is not specified
+      } else {
+        disableSubmit();
+      }
+    //Otherwise if the role is different from other
+    } else {
+    //If credit card div is displayed
+    if ($("#payment").val() == null || $("#payment").val() == "credit card") {
+        //If the credit card data is correct
+        if (CCIsValid() && zipIsValid() && cvvIsValid()) {
+          //Enable the submit button
+          enableSubmit();
+        //Otherwise disable it
+        } else {
+          disableSubmit();
+        }
+      //Otherwise if users selects other payment methods, enable
+      } else {
+        enableSubmit();
       }
     }
+  //Otherwise if the initial conditions aren't met
+  } else {
+    disableSubmit();
   }
 });
