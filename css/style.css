@@ -177,6 +177,14 @@ span {
   cursor: default;
 }
 
+.error {
+  border-color: red;
+}
+
+.error:focus {
+  border-color: #ff7070;
+}
+
 /* =================================
   Page Styles
 ==================================== */

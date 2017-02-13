@@ -145,7 +145,14 @@ $("#payment").change(function(){
 })
 
 // ===== 5th task: Form validation:
-var $submitButton = $("form").children().last()
+var $submitButton = $("form").children().last(),
+    nameNotBlank = false,
+    otherNotBlank = false,
+    validMail = false,
+    validRole = false,
+    validActivity = false,
+    validCC = false,
+    validForm = false;
 
 //Function to enable submit button
 function enableSubmit() {
@@ -159,92 +166,117 @@ function disableSubmit() {
   $submitButton.addClass("disabled");
 }
 
-//Function to check if string is empty
 function isBlank(str) {
-    return (!str || /^\s*$/.test(str));
+    var isBlank = (!str || /^\s*$/.test(str));
+    return isBlank;
 }
 
-//Function to check if e-mail format is valid
-function emailIsValid(){
-   var regex = new RegExp ("^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$");
-   return regex.test($("#mail").val());
+function valid(trueClass, $object) {
+  if (trueClass) {
+    $object.removeClass("error");
+  }
 }
 
-//Function to check if role has been selected
-function roleIsSelected() {
-  return $("#title").val() !== null
+function error(falseClass, $object) {
+  if (!falseClass) {
+    $object.addClass("error");
+  }
 }
 
-//Function to check that atleast an activity has been picked
-function activityIsValid(){
-  return ($(".activities input:checked").length > 0)
-}
+$("#name").on("keyup change", function() {
+  nameNotBlank = !isBlank($(this).val());
+  valid(nameNotBlank, $("#name"));
+  error(nameNotBlank, $("#name"));
+});
 
-//Function to check if credit card number is between 13 and 16
-function CCIsValid(){
-  str = $("#cc-num").val();
-  return str.length >= 13 && str.length <= 16
-}
+$("#mail").on("keyup change focus", function() {
+  var regex = new RegExp ("^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$");
+  validMail = regex.test($(this).val());
+  valid(validMail, $("#mail"));
+  error(validMail, $("#mail"));
+})
 
-//Function to check if ZIP code is valid
-function zipIsValid(){
-  return $("#zip").val().length == 5;
-}
+$("#title").change(function() {
+  validRole = $("#title").val() !== null;
+  if ($("#title").val() == "other") {
+    validRole = false;
+  }
+  valid(validRole, $("#title"));
+  error(validRole, $("#title"));
+})
 
-//Function to check if CVV is valid
-function cvvIsValid(){
-  return $("#cvv").val().length == 3;
-}
+$(document).on("keyup change focus", "#other-title", function() {
+  otherNotBlank = !isBlank($("#other-title").val());
+  if (otherNotBlank) {
+    valid(validRole, $("#title"));
+    valid(otherNotBlank, $("#other-title"));
+    validRole = true;
+  } else {
+    validRole = false;
+    error(validRole, $("#title"));
+    error(otherNotBlank, $("#other-title"));
+  }
+});
 
-//After changing a field
-$(document).on("change", "input, select, textarea", function(){
-  //If all of this conditions are true
-  if (
-      !isBlank($("#name").val()) &&
-      emailIsValid() &&
-      roleIsSelected() &&
-      activityIsValid()
-    ) {
-    //And if the "other" option in the role select is chosen
-    if ($("#title").val() == "other"){
-      //And if the user has specified his role
-      if (!isBlank($("#other-title").val())){
-        //And the payment is not credit card
-        if ($("#payment").val() !== null && $("#payment").val() !== "credit card") {
-          enableSubmit();
-        //Otherwise if the credit card is selected
-        } else {
-          //And if the credit card data is valid
-          if (CCIsValid() && zipIsValid() && cvvIsValid())  {
-            enableSubmit();
-          //Otherwise
-          } else {
-            disableSubmit();
-          }
-        }
-        //Otherwise if the role is not specified
-      } else {
-        disableSubmit();
-      }
-    //Otherwise if the role is different from other
+$(".activities").change(function() {
+  validActivity = ($(".activities input:checked").length > 0);
+  valid(validActivity, $(".activities"));
+  error(validActivity, $(".activities"));
+})
+
+$("#payment").change(function() {
+  if ($("#payment").val() !== "credit card" && $("#payment").val() !== null) {
+    validCC = true;
+  } else {
+    validCC = false;
+  }
+});
+
+$("#credit-card input").keyup(function() {
+  if ($("#payment").val() == "credit card" || $("#payment").val() == null) {
+    var ccNum = $("#cc-num").val(),
+          zip = $("#zip").val(),
+          cvv = $("#cvv").val(),
+          validNum = false,
+          validZIP = false,
+          validCVV = false;
+    if (ccNum.length >= 13 && ccNum.length <= 16) {
+      validNum = true;
     } else {
-    //If credit card div is displayed
-    if ($("#payment").val() == null || $("#payment").val() == "credit card") {
-        //If the credit card data is correct
-        if (CCIsValid() && zipIsValid() && cvvIsValid()) {
-          //Enable the submit button
-          enableSubmit();
-        //Otherwise disable it
-        } else {
-          disableSubmit();
-        }
-      //Otherwise if users selects other payment methods, enable
-      } else {
-        enableSubmit();
-      }
+      validNum = false;
     }
-  //Otherwise if the initial conditions aren't met
+    valid(validNum, $("#cc-num"));
+    error(validNum, $("#cc-num"));
+    if (zip.length == 5) {
+      validZIP = true;
+    } else {
+      validNum = false;
+    }
+    valid(validZIP, $("#zip"));
+    error(validZIP, $("#zip"));
+    if (cvv.length == 3) {
+      validCVV = true;
+    } else {
+      validCVV = false;
+    }
+    valid(validCVV, $("#cvv"));
+    error(validCVV, $("#cvv"))
+    if (validNum && validZIP && validCVV) {
+      validCC = true;
+    } else {
+      validCC = false;
+    }
+  }
+  valid(validCC, $("#credit-card"));
+  error(validCC, $("#credit-card"));
+})
+
+$(document).on("keyup change", "input, select, textarea", function() {
+  validForm = nameNotBlank && validMail && validRole && validActivity && validCC;
+  console.log(validForm);
+  if (validForm) {
+    enableSubmit();
   } else {
     disableSubmit();
   }
-});
+})
