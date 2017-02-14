@@ -146,14 +146,19 @@ $("#payment").change(function(){
 
 // ===== 5th task: Form validation:
 var $submitButton = $("form").children().last(),
+
     nameNotBlank = false,
     otherNotBlank = false,
+
     validMail = false,
     validRole = false,
     validActivity = false,
     validCC = false,
-    validForm = false;
+    validForm = false,
 
+    validNum = false,
+    validZIP = false,
+    validCVV = false;
 //Function to enable submit button
 function enableSubmit() {
   $submitButton.prop("disabled", false);
@@ -166,65 +171,124 @@ function disableSubmit() {
   $submitButton.addClass("disabled");
 }
 
+//Function to check if the passed string is blank
 function isBlank(str) {
     var isBlank = (!str || /^\s*$/.test(str));
     return isBlank;
 }
 
-function valid(trueClass, $object) {
-  if (trueClass) {
-    $object.removeClass("error");
+//Function that removes error class when the class is true
+function validation(validClass, $object) {
+  if (!validClass) {
+    $object.addClass("content-error");
+    $object.prev().addClass("header-error");
+  } else {
+    $object.removeClass("content-error");
+    $object.prev().removeClass("header-error")
   }
 }
 
-function error(falseClass, $object) {
-  if (!falseClass) {
-    $object.addClass("error");
-  }
-}
-
-$("#name").on("keyup change", function() {
+//Validation of name when the field is modified, changed or blurred
+//Checks that the name isn't equal to an empty string
+$("#name").on("keypress change blur", function() {
   nameNotBlank = !isBlank($(this).val());
-  valid(nameNotBlank, $("#name"));
-  error(nameNotBlank, $("#name"));
+  validation(nameNotBlank, $("#name"));
+  var originalHeader = $(this).prev().text()
+  if (!nameNotBlank) {
+    if ($(this).prev().text().length < 10) {
+      $(this).prev().append($("<span> (Please provide a valid name)</span>"))
+    }
+  } else {
+    $(this).prev().children().remove();
+  }
 });
 
-$("#mail").on("keyup change focus", function() {
+//Validation of mail when the field is modified, changed or blurred
+//Checks that the mail is formatted in the following way: xxxx@xxx.xxx
+$("#mail").on("keypress change blur", function() {
   var regex = new RegExp ("^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$");
   validMail = regex.test($(this).val());
-  valid(validMail, $("#mail"));
-  error(validMail, $("#mail"));
+  validation(validMail, $("#mail"));
+  if (!validMail) {
+    if ($(this).prev().text().length < 10) {
+      $(this).prev().append($("<span> (Please provide a valid email address)</span>"))
+    }
+  } else {
+    $(this).prev().children().remove();
+  }
 })
 
-$("#title").change(function() {
+//Validation of title when a select is chosen,
+//Checks that the title is selected
+$("#title").on("blur change", function() {
   validRole = $("#title").val() !== null;
-  if ($("#title").val() == "other") {
+  //If the other role is chosen and no further action is taken, returns false
+  if ($("#title").val() == "other" || !validRole) {
     validRole = false;
   }
-  valid(validRole, $("#title"));
-  error(validRole, $("#title"));
+  validation(validRole, $("#title"));
+  if (!validRole) {
+    if ($(this).prev().text().length < 10) {
+      $(this).prev().append($("<span> (Please specify a valid job role)</span>"))
+    }
+  } else {
+    $(this).prev().children().remove();
+  }
 })
 
-$(document).on("keyup change focus", "#other-title", function() {
+//Validation of other-title field textarea (needs to be coded like this or the
+//validation of a dynamically generated element wouldn't work)
+//Checks that the textarea is not an empty string, if it is, returns false, else true
+$(document).on("keyup change blur", "#other-title", function() {
   otherNotBlank = !isBlank($("#other-title").val());
   if (otherNotBlank) {
-    valid(validRole, $("#title"));
-    valid(otherNotBlank, $("#other-title"));
     validRole = true;
+    $(this).prev().prev().children().remove();
   } else {
     validRole = false;
-    error(validRole, $("#title"));
-    error(otherNotBlank, $("#other-title"));
   }
+  validation(otherNotBlank, $("#other-title"));
+  $(this).prev().removeClass("header-error");
+  validation(validRole, $("#title"))
 });
 
-$(".activities").change(function() {
-  validActivity = ($(".activities input:checked").length > 0);
-  valid(validActivity, $(".activities"));
-  error(validActivity, $(".activities"));
+$("#design").change(function() {
+  if ($(this).val() !== null) {
+    $(".shirt legend").children().remove();
+  }
 })
 
+//Validation of activities
+//Checks that at least one activity is selected
+$(".activities").change(function() {
+  if ($("#design").val() == null) {
+    if ($(".shirt legend").text().length < 15) {
+      $(".shirt legend").append("<span style='color:#ff2222'><br>Don't forget to pick a T-shirt!")
+    }
+  }
+  validActivity = ($(".activities input:checked").length > 0);
+  if (!validActivity) {
+    if ($(".activities legend").text().length < 30) {
+      $(".activities legend").append($("<span style='color:#ff2222'><br> Please chose at least one activity</span>"))
+    } else {
+    $(".activities legend").children().remove();
+    }
+  }
+})
+
+//Validation of payment
+//Checks that the payment is different from the credit-card, if it is, return true
 $("#payment").change(function() {
+  if ($("#design").val() == null) {
+    if ($(".shirt legend").text().length < 15) {
+      $(".shirt legend").append("<span style='color:#ff2222'><br>Don't forget to pick a T-shirt!")
+    }
+  }
+  if (!validActivity) {
+    if ($(".activities legend").text().length < 30) {
+      $(".activities legend").append($("<span style='color:#ff2222'><br> Please chose at least one activity</span>"))
+    }
+  }
   if ($("#payment").val() !== "credit card" && $("#payment").val() !== null) {
     validCC = true;
   } else {
@@ -232,48 +296,58 @@ $("#payment").change(function() {
   }
 });
 
-$("#credit-card input").keyup(function() {
-  if ($("#payment").val() == "credit card" || $("#payment").val() == null) {
-    var ccNum = $("#cc-num").val(),
-          zip = $("#zip").val(),
-          cvv = $("#cvv").val(),
-          validNum = false,
-          validZIP = false,
-          validCVV = false;
-    if (ccNum.length >= 13 && ccNum.length <= 16) {
-      validNum = true;
-    } else {
-      validNum = false;
-    }
-    valid(validNum, $("#cc-num"));
-    error(validNum, $("#cc-num"));
-    if (zip.length == 5) {
-      validZIP = true;
-    } else {
-      validNum = false;
-    }
-    valid(validZIP, $("#zip"));
-    error(validZIP, $("#zip"));
-    if (cvv.length == 3) {
-      validCVV = true;
-    } else {
-      validCVV = false;
-    }
-    valid(validCVV, $("#cvv"));
-    error(validCVV, $("#cvv"))
-    if (validNum && validZIP && validCVV) {
-      validCC = true;
-    } else {
-      validCC = false;
-    }
+//Validation of credit card number
+//Input already accepts only numbers, therefore only checks if length is between 13 and 16
+$("#cc-num").on("change blur keyup", function() {
+  var ccNum = $("#cc-num").val();
+  if (ccNum.length >= 13 && ccNum.length <= 16) {
+    validNum = true;
+  } else {
+    validNum = false;
   }
-  valid(validCC, $("#credit-card"));
-  error(validCC, $("#credit-card"));
+  validation(validNum, $("#cc-num"));
+});
+
+//Validation of zip code
+//Input already accepts only numbers, only checks if length = 5
+$("#zip").on("change blur keyup", function () {
+  var zip = $("#zip").val();
+  if (zip.length == 5) {
+    validZIP = true;
+  } else {
+    validZIP = false;
+  }
+  validation(validZIP, $("#zip"));
+});
+
+//Validation of cvv code
+//Input already accepts only numbers, only checks if length = 3
+$("#cvv").on("change blur keyup", function () {
+  var cvv = $("#cvv").val();
+  if (cvv.length == 3) {
+    validCVV = true;
+  } else {
+    validCVV = false;
+  }
+  validation(validCVV, $("#cvv"));
 })
 
+//Validation of credit credit-card
+//If all of the three above conditions are true, credit-card is valid
+$("#credit-card input").on("change blur keyup", function() {
+  if (validNum && validZIP && validCVV) {
+    validCC = true;
+  } else {
+    validCC = false;
+  }
+})
+
+//Enable/Disable of submit button
+//Periodically checks the document for the conditions to be all true, when they are
+//enable the button, when they aren't disable it
 $(document).on("keyup change", "input, select, textarea", function() {
   validForm = nameNotBlank && validMail && validRole && validActivity && validCC;
-  console.log(validForm);
+  console.log("The form is valid? "+validForm);
   if (validForm) {
     enableSubmit();
   } else {

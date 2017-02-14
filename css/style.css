@@ -177,12 +177,19 @@ span {
   cursor: default;
 }
 
-.error {
+.content-error {
   border-color: red;
+  background-color: #ff5454;
 }
 
-.error:focus {
-  border-color: #ff7070;
+.content-error:focus {
+  border-color: rgba(255,0,0,.25);
+  background-color: #ffa5a5
+}
+
+.header-error {
+  font-weight: bold;
+  color: #ff2222;
 }
 
 /* =================================
